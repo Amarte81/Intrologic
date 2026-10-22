@@ -198,17 +198,22 @@ function loadLevel(index) {
 // --- EXECUTION WITH ANIMATIONS ---
 
 function togglePlay() {
-    if (runMode === 'idle' || runMode === 'step') {
+    if (runMode === 'idle') {
         runMode = 'play';
         document.getElementById('btn-play').disabled = true;
         document.getElementById('btn-step').disabled = true;
         document.getElementById('btn-stop').disabled = false;
-        
-        if (callStack.length === 0) {
-            resetBot();
-            callStack = [{ routine: 'main', index: 0 }];
-            executeNextCommand(false);
-        } else {
+
+        resetBot();
+        callStack = [{ routine: 'main', index: 0 }];
+        executeNextCommand(false);
+    } else if (runMode === 'step') {
+        runMode = 'play';
+        document.getElementById('btn-play').disabled = true;
+        document.getElementById('btn-step').disabled = true;
+        document.getElementById('btn-stop').disabled = false;
+
+        if (!isAnimating) {
             executeNextCommand(false);
         }
     }
@@ -234,6 +239,7 @@ function stepExecution() {
 function stopExecution() {
     runMode = 'idle';
     isAnimating = false;
+    callStack = [];
     if (executionTimeout) clearTimeout(executionTimeout);
     executionTimeout = null;
     // Kill any in-flight animation callback to prevent ghost actions
@@ -391,7 +397,9 @@ function checkWinCondition() {
     if (litTargets.length === currentTargetTiles.length && currentTargetTiles.length > 0) {
         document.getElementById('win-modal').classList.remove('hidden');
         runMode = 'idle';
+        callStack = [];
         if (executionTimeout) clearTimeout(executionTimeout);
+        executionTimeout = null;
         return true;
     }
     return false;
@@ -399,6 +407,7 @@ function checkWinCondition() {
 
 function showFailModal() {
     runMode = 'idle';
+    callStack = [];
     document.getElementById('fail-modal').classList.remove('hidden');
     
     function retryHandler(e) {
