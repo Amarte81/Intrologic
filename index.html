@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lightbot: Web Clone</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- HEADER -->
+        <header>
+            <div class="level-info">
+                <h1>Lightbot Code Hour</h1>
+                <h2 id="level-title">Basics - Level 1</h2>
+            </div>
+            <div class="controls">
+                <button id="btn-levels">Livelli</button>
+            </div>
+        </header>
+
+        <!-- MAIN GAME AREA -->
+        <div class="game-container">
+            <!-- CANVAS FOR 3D VIEW -->
+            <div id="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+
+            <!-- UI PANEL FOR COMMANDS -->
+            <div id="ui-panel">
+                <!-- COMMAND PALETTE -->
+                <div class="section command-palette">
+                    <h3>Comandi</h3>
+                    <div class="palette-container">
+                        <div class="command-btn cmd-forward" data-cmd="forward" title="Avanza di un blocco">
+                            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>
+                        </div>
+                        <div class="command-btn cmd-left" data-cmd="left" title="Ruota a sinistra di 90°">
+                            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+                        </div>
+                        <div class="command-btn cmd-right" data-cmd="right" title="Ruota a destra di 90°">
+                            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M11.5 8c2.65 0 5.05.99 6.9 2.6L22 7v9h-9l3.62-3.62C15.23 11.22 13.46 10.5 11.5 10.5c-3.54 0-6.55 2.31-7.6 5.5L1.53 15.22C2.92 11.03 6.85 8 11.5 8z"/></svg>
+                        </div>
+                        <div class="command-btn cmd-jump" data-cmd="jump" title="Salta su o giù di un blocco">
+                            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C9.24 2 7 4.24 7 7c0 1.1.45 2.1 1.17 2.83L12 22l3.83-12.17A4.97 4.97 0 0017 7c0-2.76-2.24-5-5-5zm0 7.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+                        </div>
+                        <div class="command-btn cmd-light" data-cmd="light" title="Accendi la lampadina">
+                            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+                        </div>
+                        <div class="command-btn cmd-p1" data-cmd="p1" title="Esegui Procedura 1 (P1)">P1</div>
+                        <div class="command-btn cmd-p2" data-cmd="p2" title="Esegui Procedura 2 (P2)">P2</div>
+                    </div>
+                </div>
+
+                <!-- PROGRAM SLOTS -->
+                <div class="section program-slots">
+                    <div class="routine main-routine">
+                        <div class="routine-header">
+                            <h3>MAIN</h3>
+                            <span class="slot-count" id="main-count">0/12</span>
+                        </div>
+                        <div class="slots" id="slots-main"></div>
+                    </div>
+
+                    <div class="routine proc1-routine" id="proc1-container">
+                        <div class="routine-header">
+                            <h3>PROC 1</h3>
+                            <span class="slot-count" id="p1-count">0/8</span>
+                        </div>
+                        <div class="slots" id="slots-p1"></div>
+                    </div>
+
+                    <div class="routine proc2-routine" id="proc2-container">
+                        <div class="routine-header">
+                            <h3>PROC 2</h3>
+                            <span class="slot-count" id="p2-count">0/8</span>
+                        </div>
+                        <div class="slots" id="slots-p2"></div>
+                    </div>
+                </div>
+
+                <!-- EXECUTION CONTROLS -->
+                <div class="section exec-controls">
+                    <button id="btn-play" class="btn-play" title="Esegui l'intero programma">&#9654; Esegui</button>
+                    <button id="btn-step" class="btn-step" title="Esegui una singola istruzione alla volta">&#9199; Passo</button>
+                    <button id="btn-stop" class="btn-stop" disabled title="Interrompi e riavvia il livello">&#9632; Ferma</button>
+                    <button id="btn-clear" class="btn-clear" title="Svuota tutti gli slot">&#128465; Pulisci</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- LEVEL SELECTOR MODAL -->
+        <div id="level-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-btn" id="close-modal">&times;</span>
+                <h2>Seleziona Livello</h2>
+                <div class="level-groups">
+                    <div class="group">
+                        <h3>1. Basics</h3>
+                        <div class="level-buttons" id="lvl-group-1"></div>
+                    </div>
+                    <div class="group">
+                        <h3>2. Procedures</h3>
+                        <div class="level-buttons" id="lvl-group-2"></div>
+                    </div>
+                    <div class="group">
+                        <h3>3. Loops</h3>
+                        <div class="level-buttons" id="lvl-group-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WIN MODAL -->
+        <div id="win-modal" class="modal hidden">
+            <div class="modal-content text-center">
+                <h2>Livello Completato! &#127775;</h2>
+                <div class="stars">
+                    <span class="text-gold">&#9733;</span>
+                    <span class="text-gold">&#9733;</span>
+                    <span class="text-gold">&#9733;</span>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                    <button id="btn-replay-level" class="btn-primary" style="background-color: #555; color: #fff;">Rigioca</button>
+                    <button id="btn-next-level" class="btn-primary">Prossimo Livello</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAIL MODAL -->
+        <div id="fail-modal" class="modal hidden">
+            <div class="modal-content text-center">
+                <h2 style="color: #f44336; margin-bottom: 20px;">Missione Fallita! &#10060;</h2>
+                <p style="font-size: 1.2rem; margin-bottom: 20px;">Non hai acceso tutti i blocchi azzurri.</p>
+                <div class="stars">
+                    <span style="color: #555;">&#9733;</span>
+                    <span style="color: #555;">&#9733;</span>
+                    <span style="color: #555;">&#9733;</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #888; margin-top: 20px;">Premi un tasto o clicca su <strong style="color: #4da6ff;">Riprova</strong></p>
+                <button id="btn-retry-level" class="btn-primary mt-20">Riprova</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="levels.js"></script>
+    <script src="game.js"></script>
+    <script src="logic.js"></script>
+</body>
+</html>
