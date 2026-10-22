@@ -17,7 +17,7 @@ Un clone open-source moderno e completamente autosufficiente di **Lightbot: Code
 
 ## 🚀 Gioca online
 Puoi giocare direttamente tramite **GitHub Pages**:
-[https://<username>.github.io/<repo>/](https://<username>.github.io/<repo>/)
+[https://amarte81.github.io/lightbot-web/](https://amarte81.github.io/lightbot-web/)
 
 ## 💻 Esecuzione locale
 Apri semplicemente il file `index.html` in qualsiasi browser moderno (Chrome, Edge, Firefox, Safari). Non è richiesto alcun server web locale né Node.js.
