@@ -24,7 +24,7 @@ var CMD_SVG = {
     'forward': '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>',
     'left': '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>',
     'right': '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M11.5 8c2.65 0 5.05.99 6.9 2.6L22 7v9h-9l3.62-3.62C15.23 11.22 13.46 10.5 11.5 10.5c-3.54 0-6.55 2.31-7.6 5.5L1.53 15.22C2.92 11.03 6.85 8 11.5 8z"/></svg>',
-    'jump': '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2C9.24 2 7 4.24 7 7c0 1.1.45 2.1 1.17 2.83L12 22l3.83-12.17A4.97 4.97 0 0017 7c0-2.76-2.24-5-5-5zm0 7.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>',
+    'jump': '<svg viewBox="0 0 24 24" width="18" height="18"><ellipse cx="12" cy="6" rx="7" ry="2.6" fill="none" stroke="currentColor" stroke-width="2.3"/><path fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" d="M5.2 6.8 C4.5 9.8, 19.5 9.8, 18.8 11.4 C18 13.2, 5.5 13.2, 6.2 15.2 C7 17, 17.5 17, 16.8 18.6 C16 20.2, 9.5 20.2, 11.5 22"/></svg>',
     'light': '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>',
     'p1': 'P1',
     'p2': 'P2'
@@ -171,8 +171,18 @@ function loadLevel(index) {
     document.getElementById('proc1-container').style.display = lvl.p1Limit > 0 ? 'block' : 'none';
     document.getElementById('proc2-container').style.display = lvl.p2Limit > 0 ? 'block' : 'none';
 
+    var leftBtn = document.querySelector('.cmd-left');
+    var rightBtn = document.querySelector('.cmd-right');
+    var jumpBtn = document.querySelector('.cmd-jump');
     var p1Btn = document.querySelector('.cmd-p1');
     var p2Btn = document.querySelector('.cmd-p2');
+
+    var showTurns = lvl.id !== '1-1';
+    var showJump = lvl.id !== '1-1' && lvl.id !== '1-2';
+
+    if (leftBtn) leftBtn.style.display = showTurns ? 'flex' : 'none';
+    if (rightBtn) rightBtn.style.display = showTurns ? 'flex' : 'none';
+    if (jumpBtn) jumpBtn.style.display = showJump ? 'flex' : 'none';
     if (p1Btn) p1Btn.style.display = lvl.p1Limit > 0 ? 'flex' : 'none';
     if (p2Btn) p2Btn.style.display = lvl.p2Limit > 0 ? 'flex' : 'none';
 
