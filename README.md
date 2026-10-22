@@ -1,6 +1,6 @@
-# Lightbot Web Clone
+# Intrologic
 
-Un clone open-source moderno e completamente autosufficiente di **Lightbot: Code Hour**, fruibile direttamente dal browser senza plugin o dipendenze esterne.
+Un gioco di logica e programmazione visuale con puzzle a blocchi, fruibile direttamente dal browser senza plugin o dipendenze esterne.
 
 ## 🤖 Caratteristiche
 - **Grafica Isometrica 3D**: Rendering dinamico canvas con proiezione isometrica reale e ordinamento di profondità (Painter's Algorithm).
@@ -17,7 +17,7 @@ Un clone open-source moderno e completamente autosufficiente di **Lightbot: Code
 
 ## 🚀 Gioca online
 Puoi giocare direttamente tramite **GitHub Pages**:
-[https://amarte81.github.io/lightbot-web/](https://amarte81.github.io/lightbot-web/)
+[https://amarte81.github.io/Intrologic/](https://amarte81.github.io/Intrologic/)
 
 ## 💻 Esecuzione locale
 Apri semplicemente il file `index.html` in qualsiasi browser moderno (Chrome, Edge, Firefox, Safari). Non è richiesto alcun server web locale né Node.js.

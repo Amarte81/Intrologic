@@ -1,5 +1,5 @@
 // levels.js
-// Lightbot Code Hour - All 20 Levels
+// Intrologic - All 20 Levels
 //
 // Direction mapping: 0=North(-y), 1=East(+x), 2=South(+y), 3=West(-x)
 // Grid[y][x] = height of block. 0 = empty space.

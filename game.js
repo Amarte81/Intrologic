@@ -1,4 +1,4 @@
-// game.js - 3D Isometric Rendering & Animation Engine for Lightbot clone (WALL-E Style)
+// game.js - 3D Isometric Rendering & Animation Engine for Intrologic (WALL-E Style)
 
 var canvas, ctx;
 var TILE_W = 40;

@@ -1,4 +1,4 @@
-# Lightbot - WALL-E 3D Rewrite Complete
+# Intrologic - WALL-E 3D Rewrite Complete
 
 ## Novità nell'implementazione
 Ho appena ricostruito l'intero sistema di rendering del robottino da zero in `game.js`, passando a un vero e proprio motore 3D isometrico generato via codice, senza bisogno di immagini o file esterni.
