@@ -47,6 +47,23 @@ header {
     color: #ddd;
 }
 
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.progress-badge {
+    background-color: #252525;
+    color: #ffd700;
+    border: 1px solid #555;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    user-select: none;
+}
+
 #btn-levels {
     background-color: #4da6ff;
     color: #000;
@@ -311,22 +328,74 @@ header {
 }
 
 .lvl-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     background-color: #444;
-    border: none;
-    border-radius: 5px;
+    border: 2px solid transparent;
+    border-radius: 6px;
     color: #fff;
     font-weight: bold;
     cursor: pointer;
+    position: relative;
 }
 
 .lvl-btn:hover {
     background-color: #666;
 }
 
+.lvl-btn.completed {
+    background-color: #2e7d32;
+    border-color: #4dff4d;
+    color: #fff;
+}
+
+.lvl-btn.completed::after {
+    content: '✓';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    background-color: #4dff4d;
+    color: #000;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    line-height: 16px;
+    text-align: center;
+    font-weight: bold;
+}
+
 .lvl-btn.active {
     background-color: #4da6ff;
+    color: #000;
+    border-color: #fff;
+}
+
+.level-modal-footer {
+    margin-top: 24px;
+    padding-top: 15px;
+    border-top: 1px solid #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #bbb;
+}
+
+.btn-reset-progress {
+    background-color: transparent;
+    color: #ff6666;
+    border: 1px solid #ff6666;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-reset-progress:hover {
+    background-color: #ff4d4d;
     color: #000;
 }
 

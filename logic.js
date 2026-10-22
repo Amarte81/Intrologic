@@ -40,6 +40,85 @@ var CMD_SLOT_CLASS = {
     'p2': 'slot-p2'
 };
 
+// --- DEVICE PROGRESS STORAGE ---
+var STORAGE_KEY = 'intrologic_progress_v1';
+var userProgress = {
+    completed: {},
+    lastLevelIndex: 0,
+    programs: {}
+};
+
+function loadProgress() {
+    try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+                userProgress.completed = parsed.completed || {};
+                userProgress.lastLevelIndex = typeof parsed.lastLevelIndex === 'number' ? parsed.lastLevelIndex : 0;
+                userProgress.programs = parsed.programs || {};
+            }
+        }
+    } catch (e) {
+        // Fallback if localStorage is blocked
+    }
+}
+
+function saveProgress() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
+    } catch (e) {
+        // Fallback if localStorage is blocked
+    }
+}
+
+function saveCurrentLevelProgram() {
+    if (!currentLevel) return;
+    userProgress.programs[currentLevel.id] = {
+        main: programs.main.slice(),
+        p1: programs.p1.slice(),
+        p2: programs.p2.slice()
+    };
+    saveProgress();
+}
+
+function updateProgressUI() {
+    var completedCount = 0;
+    var allBtns = document.querySelectorAll('.lvl-btn');
+    for (var i = 0; i < levels.length; i++) {
+        var isDone = !!userProgress.completed[levels[i].id];
+        if (isDone) completedCount++;
+        if (allBtns[i]) {
+            if (isDone) {
+                allBtns[i].classList.add('completed');
+                allBtns[i].title = levels[i].title + ' (Completato ✓)';
+            } else {
+                allBtns[i].classList.remove('completed');
+                allBtns[i].title = levels[i].title;
+            }
+        }
+    }
+
+    var badge = document.getElementById('progress-badge');
+    if (badge) {
+        badge.innerHTML = completedCount + '/' + levels.length + ' &#9733;';
+    }
+
+    var modalText = document.getElementById('modal-progress-text');
+    if (modalText) {
+        modalText.textContent = 'Progressi salvati: ' + completedCount + ' / ' + levels.length + ' livelli completati';
+    }
+}
+
+function resetAllProgress() {
+    if (!confirm('Vuoi davvero azzerare tutti i progressi e le soluzioni salvate su questo dispositivo?')) return;
+    userProgress = { completed: {}, lastLevelIndex: 0, programs: {} };
+    saveProgress();
+    clearPrograms();
+    updateProgressUI();
+    loadLevel(0);
+}
+
 // --- INIT UI ---
 function initUI() {
     // Generate level buttons
@@ -56,11 +135,16 @@ function initUI() {
     }
 
     document.getElementById('btn-levels').onclick = function() {
+        updateProgressUI();
         document.getElementById('level-modal').classList.remove('hidden');
     };
     document.getElementById('close-modal').onclick = function() {
         document.getElementById('level-modal').classList.add('hidden');
     };
+    var resetBtn = document.getElementById('btn-reset-progress');
+    if (resetBtn) {
+        resetBtn.onclick = resetAllProgress;
+    }
     document.getElementById('btn-next-level').onclick = function() {
         document.getElementById('win-modal').classList.add('hidden');
         if (currentLevelIndex + 1 < levels.length) {
@@ -81,6 +165,7 @@ function initUI() {
     document.getElementById('btn-clear').onclick = clearPrograms;
 
     setupRoutineSlots();
+    updateProgressUI();
 }
 
 function setupRoutineSlots() {
@@ -109,6 +194,7 @@ function addCommandToRoutine(routine, cmd) {
     if (programs[routine].length < limit) {
         programs[routine].push(cmd);
         renderRoutine(routine);
+        saveCurrentLevelProgram();
     }
 }
 
@@ -116,6 +202,7 @@ function removeCommand(routine, index) {
     if (runMode !== 'idle') return;
     programs[routine].splice(index, 1);
     renderRoutine(routine);
+    saveCurrentLevelProgram();
 }
 
 function clearPrograms() {
@@ -124,6 +211,7 @@ function clearPrograms() {
     renderRoutine('main');
     renderRoutine('p1');
     renderRoutine('p2');
+    saveCurrentLevelProgram();
 }
 
 function renderRoutine(routine) {
@@ -162,11 +250,15 @@ function renderRoutine(routine) {
 }
 
 function loadLevel(index) {
+    if (index < 0 || index >= levels.length) index = 0;
     document.getElementById('level-modal').classList.add('hidden');
     stopExecution();
     currentLevelIndex = index;
     var lvl = levels[index];
     document.getElementById('level-title').textContent = lvl.title;
+
+    userProgress.lastLevelIndex = index;
+    saveProgress();
 
     document.getElementById('proc1-container').style.display = lvl.p1Limit > 0 ? 'block' : 'none';
     document.getElementById('proc2-container').style.display = lvl.p2Limit > 0 ? 'block' : 'none';
@@ -191,7 +283,21 @@ function loadLevel(index) {
     if (allBtns[index]) allBtns[index].classList.add('active');
 
     initGame(index);
-    clearPrograms();
+
+    var saved = userProgress.programs[lvl.id];
+    if (saved) {
+        programs = {
+            main: Array.isArray(saved.main) ? saved.main.slice(0, lvl.mainLimit) : [],
+            p1: Array.isArray(saved.p1) ? saved.p1.slice(0, lvl.p1Limit) : [],
+            p2: Array.isArray(saved.p2) ? saved.p2.slice(0, lvl.p2Limit) : []
+        };
+    } else {
+        programs = { main: [], p1: [], p2: [] };
+    }
+    renderRoutine('main');
+    renderRoutine('p1');
+    renderRoutine('p2');
+    updateProgressUI();
     activeRoutine = 'main';
 }
 
@@ -395,6 +501,11 @@ function isValidMove(nx, ny, currentZ) {
 
 function checkWinCondition() {
     if (litTargets.length === currentTargetTiles.length && currentTargetTiles.length > 0) {
+        if (currentLevel) {
+            userProgress.completed[currentLevel.id] = true;
+            saveProgress();
+            updateProgressUI();
+        }
         document.getElementById('win-modal').classList.remove('hidden');
         runMode = 'idle';
         callStack = [];
@@ -427,7 +538,8 @@ function showFailModal() {
 
 // Start app
 window.onload = function() {
+    loadProgress();
     initCanvas();
     initUI();
-    loadLevel(0);
+    loadLevel(userProgress.lastLevelIndex || 0);
 };
