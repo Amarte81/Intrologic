@@ -14,6 +14,10 @@ Un gioco di logica e programmazione visuale con puzzle a blocchi, fruibile diret
   - Modalità **Passo** (esecuzione passo-passo per debug).
   - Finestra di **Missione Fallita** non invasiva e pulsante **Rigioca** a fine livello.
   - Descrizioni comandi su hover.
+- **Salvataggio Progressi su Dispositivo**:
+  - Tracciamento automatico dei livelli superati (`X/20 ★`) con spunte visive nel selettore livelli.
+  - Salvataggio delle soluzioni impostate per ciascun livello e ripristino dell'ultimo livello giocato tramite `localStorage`.
+  - Opzione per azzerare i progressi in qualsiasi momento.
 
 ## 🚀 Gioca online
 Puoi giocare direttamente tramite **GitHub Pages**:
