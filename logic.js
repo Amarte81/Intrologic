@@ -45,7 +45,8 @@ var STORAGE_KEY = 'intrologic_progress_v1';
 var userProgress = {
     completed: {},
     lastLevelIndex: 0,
-    programs: {}
+    programs: {},
+    hasSeenGuide: false
 };
 
 function loadProgress() {
@@ -57,6 +58,7 @@ function loadProgress() {
                 userProgress.completed = parsed.completed || {};
                 userProgress.lastLevelIndex = typeof parsed.lastLevelIndex === 'number' ? parsed.lastLevelIndex : 0;
                 userProgress.programs = parsed.programs || {};
+                userProgress.hasSeenGuide = !!parsed.hasSeenGuide;
             }
         }
     } catch (e) {
@@ -112,7 +114,7 @@ function updateProgressUI() {
 
 function resetAllProgress() {
     if (!confirm('Vuoi davvero azzerare tutti i progressi e le soluzioni salvate su questo dispositivo?')) return;
-    userProgress = { completed: {}, lastLevelIndex: 0, programs: {} };
+    userProgress = { completed: {}, lastLevelIndex: 0, programs: {}, hasSeenGuide: true };
     saveProgress();
     clearPrograms();
     updateProgressUI();
@@ -144,6 +146,57 @@ function initUI() {
     var resetBtn = document.getElementById('btn-reset-progress');
     if (resetBtn) {
         resetBtn.onclick = resetAllProgress;
+    }
+
+    var levelModal = document.getElementById('level-modal');
+    if (levelModal) {
+        levelModal.addEventListener('click', function(e) {
+            if (e.target === levelModal) {
+                levelModal.classList.add('hidden');
+            }
+        });
+    }
+
+    // Guide / Tutorial Modal handlers
+    var guideModal = document.getElementById('guide-modal');
+    if (guideModal) {
+        guideModal.addEventListener('click', function(e) {
+            if (e.target === guideModal) {
+                guideModal.classList.add('hidden');
+                userProgress.hasSeenGuide = true;
+                saveProgress();
+            }
+        });
+    }
+
+    var guideBtn = document.getElementById('btn-guide');
+    if (guideBtn) {
+        guideBtn.onclick = function() {
+            document.getElementById('guide-modal').classList.remove('hidden');
+        };
+    }
+    var closeGuideBtn = document.getElementById('close-guide-modal');
+    if (closeGuideBtn) {
+        closeGuideBtn.onclick = function() {
+            document.getElementById('guide-modal').classList.add('hidden');
+            userProgress.hasSeenGuide = true;
+            saveProgress();
+        };
+    }
+    var startPlayingBtn = document.getElementById('btn-start-playing');
+    if (startPlayingBtn) {
+        startPlayingBtn.onclick = function() {
+            document.getElementById('guide-modal').classList.add('hidden');
+            userProgress.hasSeenGuide = true;
+            saveProgress();
+        };
+    }
+    var bannerCloseBtn = document.getElementById('banner-close');
+    if (bannerCloseBtn) {
+        bannerCloseBtn.onclick = function() {
+            var banner = document.getElementById('level-instruction-banner');
+            if (banner) banner.classList.add('hidden');
+        };
     }
     document.getElementById('btn-next-level').onclick = function() {
         document.getElementById('win-modal').classList.add('hidden');
@@ -283,6 +336,18 @@ function loadLevel(index) {
     if (allBtns[index]) allBtns[index].classList.add('active');
 
     initGame(index);
+
+    // Contextual instruction banner for this level
+    var banner = document.getElementById('level-instruction-banner');
+    var bannerText = document.getElementById('banner-text');
+    if (banner && bannerText) {
+        if (lvl.instruction) {
+            bannerText.textContent = lvl.instruction;
+            banner.classList.remove('hidden');
+        } else {
+            banner.classList.add('hidden');
+        }
+    }
 
     var saved = userProgress.programs[lvl.id];
     if (saved) {
@@ -542,4 +607,12 @@ window.onload = function() {
     initCanvas();
     initUI();
     loadLevel(userProgress.lastLevelIndex || 0);
+
+    // Show guide automatically on first start
+    if (!userProgress.hasSeenGuide) {
+        var guideModal = document.getElementById('guide-modal');
+        if (guideModal) {
+            guideModal.classList.remove('hidden');
+        }
+    }
 };

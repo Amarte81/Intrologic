@@ -15,6 +15,7 @@ const levels = [
     // Solution: F, F, Light
     {
         id: "1-1", group: 1, title: "Basics 1-1",
+        instruction: "Benvenuto! Programma il robot inserendo i comandi in MAIN. Usa Avanti (↑) e Lampadina (💡) per raggiungere e accendere la piastrella azzurra!",
         grid: [
             [1, 1, 1]
         ],
@@ -27,6 +28,7 @@ const levels = [
     // Solution: F, F, Left, F, F, Left, F, F, Light
     {
         id: "1-2", group: 1, title: "Basics 1-2",
+        instruction: "Nuovi comandi: usa Ruota a Sinistra (↺) e Ruota a Destra (↻) per cambiare direzione lungo il percorso a U.",
         grid: [
             [1, 0, 1],
             [1, 0, 1],
@@ -41,6 +43,7 @@ const levels = [
     // Solution: Jump, Right, Jump, Right, Jump, Light
     {
         id: "1-3", group: 1, title: "Basics 1-3",
+        instruction: "Nuovo comando Salto (molla): permette al robot di salire di un gradino (+1) o di scendere (-1)!",
         grid: [
             [3, 4],
             [2, 1]
@@ -54,6 +57,7 @@ const levels = [
     // Solution: Left, Jump, Jump, Jump, Jump, Right, F, F, Light
     {
         id: "1-4", group: 1, title: "Basics 1-4",
+        instruction: "Combina salti e rotazioni per superare rilievi e trincee fino all'obiettivo finale.",
         grid: [
             [3, 3, 3],
             [2, 2, 2],
@@ -132,6 +136,7 @@ const levels = [
     // MAIN: P1, P1, P1.  P1: F, F, F, Light, Right
     {
         id: "2-1", group: 2, title: "Procedures 2-1",
+        instruction: "Benvenuto nelle Procedure! Inserisci comandi ripetitivi in PROC 1 e usa il comando P1 in MAIN per richiamarli.",
         grid: [
             [1, 1, 1, 1],
             [0, 0, 0, 1],
@@ -180,6 +185,7 @@ const levels = [
     // P1: P2, P2, P2, P2.  P2: F, Light
     {
         id: "2-4", group: 2, title: "Procedures 2-4",
+        instruction: "Ora hai due procedure (P1 e P2). Puoi richiamare P2 anche dall'interno di P1 per combinare le routine!",
         grid: [
             [2, 2, 2, 2, 2],
             [0, 0, 0, 0, 2],
@@ -247,6 +253,7 @@ const levels = [
     // MAIN: P1.  P1: F, Light, P1
     {
         id: "3-1", group: 3, title: "Loops 3-1",
+        instruction: "Benvenuto nei Loop! Se inserisci il comando P1 alla fine di PROC 1, creerai un ciclo ricorsivo continuo che ripete l'azione!",
         grid: [
             [1, 1, 1, 1, 1, 1, 1],
             [2, 2, 2, 2, 2, 2, 2],

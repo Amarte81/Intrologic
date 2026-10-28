@@ -16,6 +16,7 @@
             </div>
             <div class="controls">
                 <span id="progress-badge" class="progress-badge" title="Livelli completati sul dispositivo">0/20 &#9733;</span>
+                <button id="btn-guide" class="btn-guide" title="Guida e spiegazioni del gioco">❓ Come Giocare</button>
                 <button id="btn-levels">Livelli</button>
             </div>
         </header>
@@ -25,6 +26,11 @@
             <!-- CANVAS FOR 3D VIEW -->
             <div id="canvas-container">
                 <canvas id="gameCanvas"></canvas>
+                <div id="level-instruction-banner" class="level-instruction-banner hidden">
+                    <div class="banner-icon">🤖</div>
+                    <div class="banner-text" id="banner-text"></div>
+                    <button id="banner-close" class="banner-close" title="Nascondi suggerimento">&times;</button>
+                </div>
             </div>
 
             <!-- UI PANEL FOR COMMANDS -->
@@ -144,6 +150,75 @@
                 </div>
                 <p style="font-size: 0.9rem; color: #888; margin-top: 20px;">Premi un tasto o clicca su <strong style="color: #4da6ff;">Riprova</strong></p>
                 <button id="btn-retry-level" class="btn-primary mt-20">Riprova</button>
+            </div>
+        </div>
+
+        <!-- GUIDE & TUTORIAL MODAL -->
+        <div id="guide-modal" class="modal hidden">
+            <div class="modal-content guide-modal-content">
+                <span class="close-btn" id="close-guide-modal">&times;</span>
+                <h2>Come Giocare a Intrologic 🤖</h2>
+                
+                <div class="guide-section">
+                    <h3>🎯 Obiettivo del Gioco</h3>
+                    <p>Guida il robottino attraverso i blocchi ed <strong>accendi tutte le caselle azzurre</strong> attivando la lampadina. Quando tutte le caselle azzurre diventano gialle, il livello è completato!</p>
+                </div>
+
+                <div class="guide-section">
+                    <h3>🧩 Come Programmare il Robot</h3>
+                    <p>Clicca sui comandi nella barra laterale a sinistra per aggiungerli alla sequenza di comandi (<strong>MAIN</strong>). Se vuoi rimuovere un comando inserito per sbaglio, basta cliccare sulla tessera inserita nello slot.</p>
+                </div>
+
+                <div class="guide-section">
+                    <h3>🕹️ I Comandi a Disposizione</h3>
+                    <div class="guide-cmd-grid">
+                        <div class="guide-cmd-item">
+                            <span class="guide-cmd-badge cmd-forward"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg></span>
+                            <div><strong>Avanti:</strong> Fa avanzare il robot di 1 blocco nella direzione verso cui è rivolto.</div>
+                        </div>
+                        <div class="guide-cmd-item">
+                            <span class="guide-cmd-badge cmd-left"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg></span>
+                            <div><strong>Sinistra:</strong> Ruota il robot a sinistra di 90° sul posto.</div>
+                        </div>
+                        <div class="guide-cmd-item">
+                            <span class="guide-cmd-badge cmd-right"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M11.5 8c2.65 0 5.05.99 6.9 2.6L22 7v9h-9l3.62-3.62C15.23 11.22 13.46 10.5 11.5 10.5c-3.54 0-6.55 2.31-7.6 5.5L1.53 15.22C2.92 11.03 6.85 8 11.5 8z"/></svg></span>
+                            <div><strong>Destra:</strong> Ruota il robot a destra di 90° sul posto.</div>
+                        </div>
+                        <div class="guide-cmd-item">
+                            <span class="guide-cmd-badge cmd-jump"><svg viewBox="0 0 24 24" width="18" height="18"><ellipse cx="12" cy="6" rx="7" ry="2.6" fill="none" stroke="currentColor" stroke-width="2.3"/><path fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" d="M5.2 6.8 C4.5 9.8, 19.5 9.8, 18.8 11.4 C18 13.2, 5.5 13.2, 6.2 15.2 C7 17, 17.5 17, 16.8 18.6 C16 20.2, 9.5 20.2, 11.5 22"/></svg></span>
+                            <div><strong>Salto:</strong> Salta in avanti salendo di 1 gradino (+1) oppure scendendo di 1 gradino (-1). Non può superare dislivelli superiori a 1 o muri alti.</div>
+                        </div>
+                        <div class="guide-cmd-item">
+                            <span class="guide-cmd-badge cmd-light"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg></span>
+                            <div><strong>Lampadina:</strong> Accende la piastrella azzurra su cui si trova il robot (o la spegne se già accesa).</div>
+                        </div>
+                        <div class="guide-cmd-item">
+                            <span class="guide-cmd-badge cmd-p1">P1</span>
+                            <div><strong>Procedura 1 (P1):</strong> Esegue la sequenza memorizzata in <em>PROC 1</em>. Risparmia spazio nel MAIN quando una serie di comandi si ripete!</div>
+                        </div>
+                        <div class="guide-cmd-item">
+                            <span class="guide-cmd-badge cmd-p2">P2</span>
+                            <div><strong>Procedura 2 (P2):</strong> Esegue la sequenza memorizzata in <em>PROC 2</em>. Può essere richiamata anche dall'interno di P1!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h3>🔄 Loop e Ricorsione (Mondo 3)</h3>
+                    <p>Negli schemi complessi o con pochi slot, puoi inserire il comando <strong>P1 all'interno di PROC 1</strong>: creerai una ricorsione infinita (loop) che ripeterà l'azione fino ad illuminare tutto il percorso!</p>
+                </div>
+
+                <div class="guide-section">
+                    <h3>⚡ Controlli di Esecuzione</h3>
+                    <p><strong>▶ Esegui:</strong> Avvia l'esecuzione continua del programma.<br>
+                    <strong>⏯ Passo:</strong> Esegue un solo comando alla volta, utilissimo per capire gli errori passo per passo.<br>
+                    <strong>◼ Ferma:</strong> Interrompe l'esecuzione e riporta il robot alla partenza.<br>
+                    <strong>🗑 Pulisci:</strong> Cancella tutti i comandi inseriti negli slot.</p>
+                </div>
+
+                <div class="guide-modal-footer">
+                    <button id="btn-start-playing" class="btn-primary">Inizia a Giocare! 🚀</button>
+                </div>
             </div>
         </div>
     </div>
