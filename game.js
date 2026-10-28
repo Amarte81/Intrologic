@@ -1,9 +1,17 @@
 // game.js - 3D Isometric Rendering & Animation Engine for Intrologic (WALL-E Style)
 
 var canvas, ctx;
-var TILE_W = 40;
-var TILE_H = 20;
-var BLOCK_H = 18;
+var BASE_TILE_W = 40;
+var BASE_TILE_H = 20;
+var BASE_BLOCK_H = 18;
+
+var TILE_W = BASE_TILE_W;
+var TILE_H = BASE_TILE_H;
+var BLOCK_H = BASE_BLOCK_H;
+var currentScale = 1.0;
+var originX = 0;
+var originY = 0;
+var currentLevelBounds = null;
 
 var currentLevel = null;
 var bot = null;
@@ -79,19 +87,29 @@ function initCanvas() {
 function resizeCanvas() {
     var container = document.getElementById('canvas-container');
     if (!container) return;
-    canvas.width = Math.max(container.clientWidth || 600, 200);
-    canvas.height = Math.max(container.clientHeight || 500, 200);
+    var w = Math.max(container.clientWidth || 600, 200);
+    var h = Math.max(container.clientHeight || 500, 200);
+    if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+    }
 }
 
 function initGame(levelIndex) {
     if (!canvas) initCanvas();
+    resizeCanvas();
     currentLevel = JSON.parse(JSON.stringify(levels[levelIndex]));
+    currentLevelBounds = computeLevelBaseBounds(currentLevel.grid);
     resetBot();
+    updateCamera();
     draw();
 }
 
 function resetBot() {
     if (!currentLevel) return;
+    if (!currentLevelBounds) {
+        currentLevelBounds = computeLevelBaseBounds(currentLevel.grid);
+    }
     var g = currentLevel.grid;
     var bx = currentLevel.bot.x, by = currentLevel.bot.y;
     if (by >= 0 && by < g.length && bx >= 0 && bx < g[by].length) {
@@ -235,18 +253,88 @@ function triggerAnimation(cmd, startData, targetData, duration, callback) {
     animState.active = true;
 }
 
-function isoToScreen(gx, gy, gz) {
-    var grid = currentLevel.grid;
-    var rows = grid.length, cols = 0, maxH = 0;
-    for (var r = 0; r < rows; r++) {
-        if (grid[r].length > cols) cols = grid[r].length;
-        for (var c = 0; c < grid[r].length; c++) if ((grid[r][c] || 0) > maxH) maxH = grid[r][c];
+function computeLevelBaseBounds(grid) {
+    if (!grid || !grid.length) {
+        return {
+            minX: -BASE_TILE_W, maxX: BASE_TILE_W, minY: -BASE_TILE_H, maxY: BASE_TILE_H + BASE_BLOCK_H,
+            width: BASE_TILE_W * 2, height: BASE_TILE_H * 2 + BASE_BLOCK_H, midX: 0, midY: 0
+        };
     }
-    var cx = canvas.width / 2;
-    var cy = canvas.height / 2 + (maxH * BLOCK_H) / 4;
-    var dx = gx - (cols - 1) / 2;
-    var dy = gy - (rows - 1) / 2;
-    return { x: cx + (dx - dy) * TILE_W, y: cy + (dx + dy) * TILE_H - gz * BLOCK_H };
+    var rows = grid.length;
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (var gy = 0; gy < rows; gy++) {
+        var row = grid[gy] || [];
+        for (var gx = 0; gx < row.length; gx++) {
+            var h = row[gx] || 0;
+            if (h > 0) {
+                var isoX = (gx - gy) * BASE_TILE_W;
+                for (var gz = 1; gz <= h; gz++) {
+                    var isoY = (gx + gy) * BASE_TILE_H - gz * BASE_BLOCK_H;
+                    minX = Math.min(minX, isoX - BASE_TILE_W);
+                    maxX = Math.max(maxX, isoX + BASE_TILE_W);
+                    minY = Math.min(minY, isoY - BASE_TILE_H);
+                    maxY = Math.max(maxY, isoY + BASE_TILE_H + BASE_BLOCK_H);
+                }
+                // Headroom for the bot standing or jumping on this tile
+                var botHeadIsoY = (gx + gy) * BASE_TILE_H - (h + 2.2) * BASE_BLOCK_H;
+                minY = Math.min(minY, botHeadIsoY);
+            }
+        }
+    }
+    if (minX === Infinity) {
+        minX = -BASE_TILE_W; maxX = BASE_TILE_W;
+        minY = -BASE_TILE_H; maxY = BASE_TILE_H + BASE_BLOCK_H;
+    }
+    return {
+        minX: minX, maxX: maxX, minY: minY, maxY: maxY,
+        width: Math.max(1, maxX - minX),
+        height: Math.max(1, maxY - minY),
+        midX: (minX + maxX) / 2,
+        midY: (minY + maxY) / 2
+    };
+}
+
+function updateCamera() {
+    if (!currentLevel || !canvas) return;
+    if (!currentLevelBounds) {
+        currentLevelBounds = computeLevelBaseBounds(currentLevel.grid);
+    }
+    
+    // Check if contextual tutorial banner is visible and taking vertical room
+    var banner = document.getElementById('level-instruction-banner');
+    var topPadding = 20;
+    if (banner && !banner.classList.contains('hidden') && banner.offsetHeight > 0) {
+        topPadding = Math.max(topPadding, banner.offsetTop + banner.offsetHeight + 14);
+    }
+    var bottomPadding = 20;
+    var sidePadding = 20;
+    
+    var availW = Math.max(50, canvas.width - sidePadding * 2);
+    var availH = Math.max(50, canvas.height - topPadding - bottomPadding);
+    
+    var scaleX = availW / currentLevelBounds.width;
+    var scaleY = availH / currentLevelBounds.height;
+    var fitScale = Math.min(scaleX, scaleY);
+    
+    // Scale level down if it does not fit on screen; cap at 1.0 (original size)
+    currentScale = Math.max(0.25, Math.min(1.0, fitScale));
+    
+    TILE_W = BASE_TILE_W * currentScale;
+    TILE_H = BASE_TILE_H * currentScale;
+    BLOCK_H = BASE_BLOCK_H * currentScale;
+    
+    var targetCenterX = canvas.width / 2;
+    var targetCenterY = topPadding + availH / 2;
+    
+    originX = targetCenterX - currentLevelBounds.midX * currentScale;
+    originY = targetCenterY - currentLevelBounds.midY * currentScale;
+}
+
+function isoToScreen(gx, gy, gz) {
+    return {
+        x: originX + (gx - gy) * TILE_W,
+        y: originY + (gx + gy) * TILE_H - gz * BLOCK_H
+    };
 }
 
 function fillPolyRaw(pts, color, strokeColor, lineWidth) {
@@ -396,11 +484,13 @@ function drawWallE() {
         var srcR = isoToScreen(bx + tPt(0.13, 0.2, 0.95, pitch)[0], by + tPt(0.13, 0.2, 0.95, pitch)[1], bz + 0.95);
         var tgt = isoToScreen(bx, by, bz);
         
+        // Laser Beam Effect
+        var beamW = 25 * currentScale, beamH = 10 * currentScale;
         ctx.save();
         ctx.globalAlpha = animState.lightIntensity * 0.7;
         ctx.fillStyle = 'rgba(255, 235, 59, 0.5)';
-        ctx.beginPath(); ctx.moveTo(srcL.x, srcL.y); ctx.lineTo(tgt.x - 25, tgt.y + 10); ctx.lineTo(tgt.x + 25, tgt.y + 10); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(srcR.x, srcR.y); ctx.lineTo(tgt.x - 25, tgt.y + 10); ctx.lineTo(tgt.x + 25, tgt.y + 10); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(srcL.x, srcL.y); ctx.lineTo(tgt.x - beamW, tgt.y + beamH); ctx.lineTo(tgt.x + beamW, tgt.y + beamH); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(srcR.x, srcR.y); ctx.lineTo(tgt.x - beamW, tgt.y + beamH); ctx.lineTo(tgt.x + beamW, tgt.y + beamH); ctx.fill();
         ctx.restore();
     }
 }
@@ -410,6 +500,8 @@ function draw() {
         initCanvas();
         if (!canvas || !ctx) return;
     }
+    resizeCanvas();
+    updateCamera();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!currentLevel) return;
 
